@@ -68,12 +68,13 @@ def update_db(jsonpath):
     db = None
     try:
         db = sqlite.connect('contacts.db')
+        db.text_factory = str
         cursor = db.cursor()
         cursor.execute('CREATE TABLE IF NOT EXISTS Contacts(name TEXT PRIMARY KEY, first_seen TEXT, last_seen TEXT)')
 
         for contact in contacts:
-            sqlupdate = "INSERT OR REPLACE INTO Contacts(name,first_seen,last_seen) VALUES ('{name}', coalesce((SELECT first_seen FROM Contacts WHERE name='{name}'),'{now}'), '{now}')".format(name=contact, now=date)
-            cursor.execute(sqlupdate)
+            sqlupdate = "INSERT OR REPLACE INTO Contacts(name,first_seen,last_seen) VALUES (?, coalesce((SELECT first_seen FROM Contacts WHERE name=?),'{now}'), '{now}')".format(now=date)
+            cursor.execute(sqlupdate,(contact,contact))
 
         db.commit()
 
